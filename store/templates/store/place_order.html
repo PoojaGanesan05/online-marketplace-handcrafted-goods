@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirm Order</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
+    <h2 class="text-2xl font-bold mb-4">Confirm Order</h2>
+    <p class="mb-4">Are you sure you want to order <strong>{{ product.name }}</strong> for ₹{{ product.price }}?</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Yes, Order</button>
+      <a href="{% url 'buyer_dashboard' %}" class="ml-4 text-blue-600">Cancel</a>
+    </form>
+  </div>
+</body>
+</html>

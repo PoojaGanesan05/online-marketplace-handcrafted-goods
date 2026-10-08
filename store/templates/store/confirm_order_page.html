@@ -1,0 +1,18 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4 text-center bg-light">
+        <div class="card-body p-5">
+            <div class="text-success display-1 mb-3">&#10004;</div>
+            <h2 class="text-success mb-3">Order Placed Successfully!</h2>
+            <p class="fs-5">Your order has been placed and is awaiting confirmation by the seller.</p>
+            <p class="mb-1"><strong>{{ order.product.name }}</strong> &mdash; ₹{{ order.total_amount }} ({{ order.get_payment_method_display }})</p>
+            <p class="text-muted">Delivering to: {{ order.delivery_address }}</p>
+            <a href="{% url 'order_history' %}" class="btn btn-primary mt-4 px-4 py-2 rounded-pill">My Orders</a>
+            <a href="{% url 'buyer_dashboard' %}" class="btn btn-outline-primary mt-4 px-4 py-2 rounded-pill">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Select Role</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-yellow-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-6 rounded shadow-lg text-center w-full max-w-md">
+        <h2 class="text-2xl font-bold text-yellow-600 mb-4">Select Your Role</h2>
+        {% for message in messages %}
+            <div class="text-sm mb-3 {% if message.tags == 'danger' %}text-red-500{% else %}text-gray-600{% endif %}">{{ message }}</div>
+        {% endfor %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <button type="submit" name="role" value="buyer" class="w-full py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">I am a Buyer</button>
+                <button type="submit" name="role" value="seller" class="w-full py-2 bg-yellow-700 text-white rounded hover:bg-yellow-800">I am a Seller</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

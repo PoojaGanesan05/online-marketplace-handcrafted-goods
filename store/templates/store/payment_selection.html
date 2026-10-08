@@ -1,0 +1,30 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-5 bg-light">
+            <h2 class="mb-2 text-primary">Choose Payment Method</h2>
+            <p class="mb-4">{{ order.product.name }} &mdash; amount payable: <strong>₹{{ order.total_amount }}</strong></p>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="payment_method" value="gpay" required>
+                    <label class="form-check-label">UPI - Google Pay</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="payment_method" value="phonepe">
+                    <label class="form-check-label">UPI - PhonePe</label>
+                </div>
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="radio" name="payment_method" value="cod">
+                    <label class="form-check-label">Cash on Delivery</label>
+                </div>
+                <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">Confirm Payment</button>
+                <a href="{% url 'review_order' order.product_id %}" class="btn btn-outline-secondary px-4 py-2 rounded-pill">Back</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

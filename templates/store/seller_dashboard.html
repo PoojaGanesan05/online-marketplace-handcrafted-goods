@@ -1,0 +1,237 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        padding: 40px;
+        justify-content: center;
+    }
+
+    .form-card, .content-card {
+        background: white;
+        padding: 20px 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .form-card input, .form-card button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    .form-card button {
+        background-color: #6a0dad;
+        color: white;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+    }
+
+    .form-card button:hover {
+        background-color: #570ea8;
+    }
+
+    .errorlist { list-style: none; padding: 0; margin: 0; color: #dc3545; font-size: 14px; }
+
+    .status-confirmed { color: #28a745; font-weight: 600; }
+    .status-pending { color: #e67e22; font-weight: 600; }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-top: 10px;
+        color: #6a0dad;
+        border-bottom: 2px solid #6a0dad;
+        padding-bottom: 4px;
+    }
+
+    .product-card {
+        margin-top: 15px;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 12px;
+        position: relative;
+    }
+
+    .product-card img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 8px;
+        max-height: 300px;
+    }
+
+    .product-actions {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .edit-button, .delete-button {
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .edit-button {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .delete-button {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .order-box, .review-item {
+        background: #f2f2f2;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+
+    .confirm-button, .reject-button {
+        margin-top: 5px;
+        display: inline-block;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .confirm-button {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .confirm-button:hover {
+        background-color: #218838;
+    }
+
+    .reject-button {
+        background-color: #dc3545;
+        color: white;
+        margin-left: 8px;
+    }
+
+    .reject-button:hover {
+        background-color: #c82333;
+    }
+</style>
+
+<h2 style="text-align: center; color: #6a0dad;">Welcome to Seller Dashboard</h2>
+
+<div class="dashboard-container">
+
+    <!-- Upload Product Form -->
+    <div class="form-card">
+        <h3 class="section-title">Upload New Product</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="upload_product" value="1">
+            {{ form.non_field_errors }}
+            <label>Name:</label>
+            {{ form.name }}
+            {{ form.name.errors }}
+            <label>Image:</label>
+            {{ form.image }}
+            {{ form.image.errors }}
+            <label>Price:</label>
+            {{ form.price }}
+            {{ form.price.errors }}
+            <button type="submit">Upload Product</button>
+        </form>
+    </div>
+
+    <!-- Products, Orders, Reviews -->
+    <div class="content-card">
+        <h3 class="section-title">Your Products</h3>
+        {% for product in products %}
+            <div class="product-card">
+                <h4 style="color: #6a0dad;">{{ product.name }}</h4>
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <p>No image available</p>
+                {% endif %}
+                <p><strong>Price:</strong> ₹{{ product.price }}</p>
+                <p><strong>Uploaded:</strong> {{ product.created_at|date:"M d, Y H:i" }}</p>
+
+                <div class="product-actions">
+                    <a href="{% url 'edit_product' product.id %}" class="edit-button">Edit</a>
+                    <form method="POST" action="{% url 'delete_product' product.id %}" class="d-inline"
+                          onsubmit="return confirm('Delete this product? Its orders and reviews will be removed too.')">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-button" style="border: none; cursor: pointer;">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <p>No products uploaded yet.</p>
+        {% endfor %}
+
+        <!-- Orders Section -->
+        <div class="order-section">
+            <h3 class="section-title">Orders Received</h3>
+            {% for order in orders %}
+                <div class="order-box">
+                    <p><strong>Product:</strong> {{ order.product.name }}</p>
+                    <p><strong>Buyer:</strong> {{ order.buyer.username }}</p>
+                    <p><strong>Status:</strong> <span class="{% if order.confirmed %}status-confirmed{% else %}status-pending{% endif %}">{{ order.status }}</span></p>
+                    <p><strong>Payment:</strong> {{ order.get_payment_method_display|default:"-" }}</p>
+                    <p><strong>Ordered At:</strong> {{ order.ordered_at|date:"M d, Y, g:i a" }}</p>
+                    <p><strong>Address:</strong> {{ order.delivery_address }}</p>
+                    <p><strong>Mobile:</strong> {{ order.mobile_number }}</p>
+                    <p><strong>Delivery Charge:</strong> ₹{{ order.delivery_charge }}</p>
+                    <p><strong>Total Price:</strong> ₹{{ order.total_amount }}</p>
+                    {% if not order.confirmed %}
+                    <form method="POST" action="{% url 'confirm_order' order.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button class="btn confirm-button">Confirm</button>
+                    </form>
+
+                    <form method="POST" action="{% url 'reject_order' order.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button class="btn reject-button">Reject</button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>No orders placed yet.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="review-section">
+            <h3 class="section-title">Product Reviews</h3>
+            {% for review in reviews %}
+                <div class="review-item">
+                    <p><strong>Product:</strong> {{ review.product.name }}</p>
+                    <p><strong>Buyer:</strong> {{ review.buyer.username }}</p>
+                    {% if review.rating %}<p><strong>Rating:</strong> {{ review.rating }}/5</p>{% endif %}
+                    <p><strong>Comment:</strong> {{ review.comment }}</p>
+                    <p><strong>Date:</strong> {{ review.ordered_at|date:"M d, Y H:i" }}</p>
+                </div>
+            {% empty %}
+                <p>No reviews yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
